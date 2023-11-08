@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:introapp/views/quiz_screen.dart';
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
+  const HomeScreen(this.onStartButtonPressed, {super.key});
+  final void Function() onStartButtonPressed;
+  Widget build(BuildContext buildContext) {
     return Scaffold(
       backgroundColor: Colors.deepPurpleAccent,
       body: Center(
@@ -27,11 +25,7 @@ class HomeScreen extends StatelessWidget {
                     letterSpacing: 1.5)),
             ElevatedButton(
               onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => const QuizScreen(),
-                  ),
-                );
+                onStartButtonPressed();
               },
               style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.amber, foregroundColor: Colors.black),
