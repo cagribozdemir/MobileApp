@@ -1,3 +1,4 @@
+import 'package:expenseapp/models/expense.dart';
 import 'package:flutter/material.dart';
 
 class NewExpense extends StatefulWidget {
@@ -10,21 +11,31 @@ class NewExpense extends StatefulWidget {
 class _NewExpenseState extends State<NewExpense> {
   var _expenseNameController = TextEditingController();
   var _expensePriceController = TextEditingController();
-  DateTime selectedDate = DateTime.now();
-  bool isDateSelected = false;
+  DateTime _selectedDate = DateTime.now();
+  bool _isDateSelected = false;
+  Category _selectedCategory = Category.work;
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: selectedDate,
+      initialDate: _selectedDate,
       firstDate: DateTime.now().subtract(const Duration(days: 365)),
       lastDate: DateTime.now(),
     );
-    if (picked != null && picked != selectedDate)
+    if (picked != null && picked != _selectedDate) {
       setState(() {
-        selectedDate = picked;
-        isDateSelected = true;
+        _selectedDate = picked;
+        _isDateSelected = true;
       });
+    }
+  }
+
+  void _addExpense() {
+    Expense expense = Expense(
+        name: _expenseNameController.text,
+        price: double.parse(_expensePriceController.text),
+        date: _selectedDate,
+        category: _selectedCategory);
   }
 
   @override
@@ -32,32 +43,66 @@ class _NewExpenseState extends State<NewExpense> {
     return Container(
       width: double.infinity,
       child: Padding(
-        padding: EdgeInsets.all(12.0),
+        padding: const EdgeInsets.all(12.0),
         child: Column(
           children: [
             TextField(
               controller: _expenseNameController,
               maxLength: 50,
-              decoration: InputDecoration(labelText: "Harcama Adı"),
+              decoration: const InputDecoration(labelText: "Harcama Adı"),
             ),
-            TextField(
-              controller: _expensePriceController,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(labelText: "Harcama Miktarı"),
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _expensePriceController,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                        labelText: "Harcama Miktarı", prefixText: "₺"),
+                  ),
+                ),
+                IconButton(
+                    onPressed: () => _selectDate(context),
+                    icon: const Icon(Icons.calendar_month)),
+                if (_isDateSelected)
+                  Text("${_selectedDate.toLocal()}".split(' ')[0] ?? "")
+                else
+                  const Text("Tarih Seçiniz"),
+              ],
             ),
-            IconButton(
-                onPressed: () => _selectDate(context),
-                icon: const Icon(Icons.calendar_month)),
-            if (isDateSelected)
-              Text("${selectedDate.toLocal()}".split(' ')[0] ?? "")
-            else
-              Text("Tarih Seçiniz"),
-            ElevatedButton(
-              onPressed: () {
-                print(
-                    "Kaydedilen değer: ${_expenseNameController.text} ${_expensePriceController.text} $selectedDate");
-              },
-              child: Text("Ekle"),
+            const SizedBox(
+              height: 30,
+            ),
+            Row(
+              children: [
+                DropdownButton(
+                    value: _selectedCategory,
+                    items: Category.values.map((category) {
+                      return DropdownMenuItem(
+                          value: category, child: Text(category.name));
+                    }).toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        if (value != null) _selectedCategory = value;
+                      });
+                    })
+              ],
+            ),
+            const Spacer(),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: const Text("Kapat")),
+                const SizedBox(
+                  width: 12,
+                ),
+                ElevatedButton(
+                    onPressed: () => _addExpense(), child: const Text("Ekle")),
+              ],
             ),
           ],
         ),
