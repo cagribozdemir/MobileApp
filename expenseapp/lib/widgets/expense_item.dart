@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class ExpenseItem extends StatelessWidget {
-  // unnamed argument => default olarak required'dır
-  // named argument => belirtmek gerekir
   const ExpenseItem(this.expense, {Key? key}) : super(key: key);
   final Expense expense;
 

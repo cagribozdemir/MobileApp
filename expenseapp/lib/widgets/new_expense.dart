@@ -2,7 +2,8 @@ import 'package:expenseapp/models/expense.dart';
 import 'package:flutter/material.dart';
 
 class NewExpense extends StatefulWidget {
-  const NewExpense({Key? key}) : super(key: key);
+  const NewExpense(this.onAdd, {Key? key}) : super(key: key);
+  final void Function(Expense expense) onAdd;
 
   @override
   _NewExpenseState createState() => _NewExpenseState();
@@ -28,14 +29,6 @@ class _NewExpenseState extends State<NewExpense> {
         _isDateSelected = true;
       });
     }
-  }
-
-  void _addExpense() {
-    Expense expense = Expense(
-        name: _expenseNameController.text,
-        price: double.parse(_expensePriceController.text),
-        date: _selectedDate,
-        category: _selectedCategory);
   }
 
   @override
@@ -101,7 +94,16 @@ class _NewExpenseState extends State<NewExpense> {
                   width: 12,
                 ),
                 ElevatedButton(
-                    onPressed: () => _addExpense(), child: const Text("Ekle")),
+                    onPressed: () {
+                      Expense expense = Expense(
+                          name: _expenseNameController.text,
+                          price: double.tryParse(_expensePriceController.text)!,
+                          date: _selectedDate!,
+                          category: _selectedCategory);
+                      widget.onAdd(expense);
+                      Navigator.pop(context);
+                    },
+                    child: const Text("Ekle")),
               ],
             ),
           ],

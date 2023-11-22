@@ -3,25 +3,17 @@ import 'package:expenseapp/widgets/expense_item.dart';
 import 'package:flutter/material.dart';
 
 class ExpensesPage extends StatefulWidget {
-  const ExpensesPage({Key? key}) : super(key: key);
-
+  const ExpensesPage(this.expenses, this.onRemove, {Key? key})
+      : super(key: key);
+  final List<Expense> expenses;
+  final void Function(Expense expense) onRemove;
   @override
   _ExpensesPageState createState() => _ExpensesPageState();
 }
 
 class _ExpensesPageState extends State<ExpensesPage> {
-  List<Expense> expenses = [
-    Expense(
-        name: "Yemek",
-        price: 500.529,
-        date: DateTime.now(),
-        category: Category.food),
-    Expense(
-        name: "Udemy Kursu",
-        price: 200,
-        date: DateTime.now(),
-        category: Category.work),
-  ];
+  int? _lastRemovedIndex;
+  late Expense _lastRemovedExpense;
 
   @override
   Widget build(BuildContext context) {
@@ -35,10 +27,35 @@ class _ExpensesPageState extends State<ExpensesPage> {
           ),
           Expanded(
             child: ListView.builder(
-                itemCount: expenses.length,
-                itemBuilder: (context, index) {
-                  return ExpenseItem(expenses[index]);
-                }),
+              itemCount: widget.expenses.length,
+              itemBuilder: (context, index) {
+                return Dismissible(
+                  key: ValueKey(widget.expenses[index]),
+                  child: ExpenseItem(widget.expenses[index]),
+                  onDismissed: (direction) {
+                    _lastRemovedIndex = index;
+                    _lastRemovedExpense = widget.expenses[index];
+                    widget.onRemove(widget.expenses[index]);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: const Text("Expense removed"),
+                        action: SnackBarAction(
+                          label: "Undo",
+                          onPressed: () {
+                            setState(() {
+                              widget.expenses.insert(
+                                _lastRemovedIndex!,
+                                _lastRemovedExpense,
+                              );
+                            });
+                          },
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
           ),
           const SizedBox(
             height: 150,
